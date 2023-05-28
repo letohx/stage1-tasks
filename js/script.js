@@ -7,7 +7,15 @@ const slidePrev = document.querySelector('.slide-prev');
 const weatherIcon = document.querySelector('.weather-icon');
 const temperature = document.querySelector('.temperature');
 const weatherDescription = document.querySelector('.weather-description');
+const wind = document.querySelector('.wind');
+const humidity = document.querySelector('.humidity');
 const city = document.querySelector('.city');
+const quote = document.querySelector('.quote');
+const author = document.querySelector('.author');
+const changeQuote = document.querySelector('.change-quote');
+const audio = document.querySelector('audio');
+const playBtn = document.querySelector('.play');
+
 
 // Сlock and Сalendar
 
@@ -77,10 +85,10 @@ window.addEventListener('load', getLocalStorage);
 
 let randomNum;
 
-function getRandomNum() { 
-    randomNum = Math.floor( (20 * Math.random()) + 1 );
+function getRandomNum(n) { 
+    randomNum = Math.floor( (n * Math.random()) + 1 );
 };
-getRandomNum();
+getRandomNum(20);
 
 function setBg() {
   const timeOfDay = getTimeOfDay();
@@ -120,24 +128,44 @@ async function getWeather() {
     weatherIcon.classList.add(`owf-${data.weather[0].id}`);
     temperature.textContent = `${Math.round(data.main.temp)}°C`;
     weatherDescription.textContent = data.weather[0].description;
-  }
-  getWeather()
+    wind.textContent = `Скорость ветра: ${Math.round(data.wind.speed)} м/с`;
+    humidity.textContent = `Влажность: ${Math.round(data.main.humidity)}%`;
+}
+getWeather()
 
-  city.addEventListener("change", (event) => {
-    getWeather();
-  });
+city.addEventListener("change", (event) => {
+  getWeather();
+});
 
-  function setLocalStorageWeather() {
-    if(city) {
-      localStorage.setItem('city', city.value);
-    };
+function setLocalStorageWeather() {
+  if(city) {
+    localStorage.setItem('city', city.value);
   };
-  window.addEventListener('beforeunload', setLocalStorageWeather);
+};
+window.addEventListener('beforeunload', setLocalStorageWeather);
   
-  function getLocalStorageWeather() {
-    if(localStorage.getItem('city')) {
-      city.value = localStorage.getItem('city');
-    };
-    getWeather()
+function getLocalStorageWeather() {
+  if(localStorage.getItem('city')) {
+    city.value = localStorage.getItem('city');
   };
-  window.addEventListener('load', getLocalStorageWeather);
+  getWeather()
+};
+window.addEventListener('load', getLocalStorageWeather);
+
+
+// Quote of the day
+
+
+let randomNumCitations;
+
+async function getQuotes() {  
+  const res = await fetch('js/data.json');
+  const data = await res.json(); 
+  
+  randomNumCitations = Math.floor(((data.length) * Math.random()));
+  quote.textContent = data[randomNumCitations].text;
+  author.textContent = data[randomNumCitations].author;
+  }
+getQuotes();
+
+changeQuote.addEventListener('click', getQuotes);
