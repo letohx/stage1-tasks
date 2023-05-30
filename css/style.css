@@ -66,7 +66,7 @@ body {
 }
 
 .item-active::before {
-  color: #C5B358;
+  color: #88c682;
 }
 
 .player-icon,

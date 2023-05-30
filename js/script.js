@@ -15,6 +15,12 @@ const author = document.querySelector('.author');
 const changeQuote = document.querySelector('.change-quote');
 const audio = document.querySelector('audio');
 const playBtn = document.querySelector('.play');
+const playNextBtn = document.querySelector('.play-next');
+const playPrevBtn = document.querySelector('.play-prev');
+const playListContainer = document.querySelector('.play-list');
+
+
+
 
 
 // Сlock and Сalendar
@@ -119,6 +125,8 @@ slidePrev.addEventListener('click', getSlidePrev);
 
 // Weather widget
 
+city.value = city.value == true ? city.value : "Braslaw";
+
 async function getWeather() {  
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${city.value}&lang=ru&appid=efa7a758e84992cc2a2543cb878a4812&units=metric`;
     const res = await fetch(url);
@@ -131,7 +139,7 @@ async function getWeather() {
     wind.textContent = `Скорость ветра: ${Math.round(data.wind.speed)} м/с`;
     humidity.textContent = `Влажность: ${Math.round(data.main.humidity)}%`;
 }
-getWeather()
+getWeather();
 
 city.addEventListener("change", (event) => {
   getWeather();
@@ -148,13 +156,12 @@ function getLocalStorageWeather() {
   if(localStorage.getItem('city')) {
     city.value = localStorage.getItem('city');
   };
-  getWeather()
+  getWeather();
 };
 window.addEventListener('load', getLocalStorageWeather);
 
 
 // Quote of the day
-
 
 let randomNumCitations;
 
@@ -165,7 +172,91 @@ async function getQuotes() {
   randomNumCitations = Math.floor(((data.length) * Math.random()));
   quote.textContent = data[randomNumCitations].text;
   author.textContent = data[randomNumCitations].author;
-  }
+  };
 getQuotes();
-
 changeQuote.addEventListener('click', getQuotes);
+
+
+// Audio player
+
+import playList from './playList.js';
+
+let isPlay = false;
+let playNum = 0;
+
+function playAudio() {
+  if (!isPlay) {
+    audio.src = playList[playNum].src;
+    audio.currentTime = 0;
+    audio.play();
+    isPlay = true;
+    toggleBtn();
+  } else {
+    audio.pause();
+    isPlay = false;
+    toggleBtn();
+  };
+  stylePlayItems();
+};
+playBtn.addEventListener('click', playAudio);
+
+function toggleBtn() {
+  if (!isPlay) {
+    playBtn.classList.remove('pause');
+  } else {
+    playBtn.classList.add('pause');
+  };
+};
+playBtn.addEventListener('click', toggleBtn);
+
+function playNext() {
+  playNum = (playNum < (playList.length - 1)) ? (playNum += 1) : 0;
+  isPlay = false;
+  document.querySelectorAll('.item-active').forEach(el => {
+    el.classList.remove('item-active');
+  });
+  playAudio();
+  toggleBtn();
+};
+playNextBtn.addEventListener('click', playNext);
+
+function playPrev() {
+  playNum = (playNum > 0) ? (playNum -= 1) : (playList.length - 1);
+  isPlay = false;
+  document.querySelectorAll('.item-active').forEach(el => {
+    el.classList.remove('item-active');
+  });
+  playAudio();
+  toggleBtn();
+};
+playPrevBtn.addEventListener('click', playPrev);
+
+playList.forEach(el => {
+  const li = document.createElement('li');
+  li.classList.add('play-item');
+  li.textContent = el.title;
+  playListContainer.append(li);
+});
+
+function stylePlayItems() {
+  if (!isPlay ) {
+    document.querySelectorAll('.item-active').forEach(el => {
+      el.classList.remove('item-active');
+    });
+  } else {
+    document.querySelectorAll('.play-list li')[playNum].classList.add('item-active');
+  };
+};
+
+const arrElem = document.querySelectorAll('.play-item');
+const arrayElem = [];
+
+for (let i = 0; i < playList.length; i++){
+  arrayElem.push(arrElem[i]);
+  arrElem[i].addEventListener('click', function(e){
+    playNum = arrayElem.indexOf(e.target);
+    playAudio();
+  });
+};
+
+
